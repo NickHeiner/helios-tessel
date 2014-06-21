@@ -1,0 +1,38 @@
+{
+  "name": "tessel-helios",
+  "version": "0.0.0",
+  "description": "Tessel app that reads from the ambient data module and posts it to firebase",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NickHeiner/tessel-helios"
+  },
+  "keywords": [
+    "tessel",
+    "hardware"
+  ],
+  "main": "blinky.js",
+  "author": "Nick Heiner <nth23@cornell.edu>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NickHeiner/tessel-helios/issues"
+  },
+  "homepage": "https://github.com/NickHeiner/tessel-helios",
+  "dependencies": {
+    "tessel": "^0.3.5"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "load-grunt-tasks": "^0.5.0",
+    "q": "^1.0.1"
+  },
+  "hardware": {
+    "grunt": false,
+    "grunt-contrib-jshint": false,
+    "load-grunt-tasks": false,
+    "q": false
+  }
+}
