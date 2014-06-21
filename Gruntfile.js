@@ -4,33 +4,54 @@ module.exports = function(grunt) {
         path = require('path'),
         util = require('util'),
         _ = require('lodash'),
+        q = require('q'),
         qFs = require('q-io/fs');
 
     require('load-grunt-tasks')(grunt);
 
     grunt.initConfig({
+
         jshint: {
             apps: {
                 src: ['apps/**/*.js']
+            },
+            grunt: {
+                src: ['Gruntfile.js']
             }
         }
     });
 
     grunt.registerTask('tessel-push', function() {
         var done = this.async(),
+            pkgJsonFilePath = path.join(__dirname, 'package.json');
 
-            push = spawn('tessel', ['push']);
+        qFs.read(pkgJsonFilePath).then(function(packageJsonContents) {
+            var packageJson = JSON.parse(packageJsonContents),
+                deferred = q.defer(),
+                push;
 
-        push.stdout.pipe(process.stdout);
-        push.stderr.pipe(process.stderr);
+            grunt.log.ok('Pushing `' + packageJson.main + '`');
+            push = spawn('tessel', ['push', packageJson.main]);
 
-        push.on('close', function(code, signal) {
-            if (code !== 0) {
-                done(new Error('tessel push exited with code `' + code + '` and signal `' + signal +'`'));
-                return;
-            }
-            done();
+            push.stdout.pipe(process.stdout);
+            push.stderr.pipe(process.stderr);
+
+            push.on('close', function(code, signal) {
+                if (code !== 0) {
+                    deferred.reject(
+                        new Error('tessel push exited with code `' + code + '` and signal `' + signal +'`')
+                    );
+                    return;
+                }
+                grunt.log.ok('Pushed `' + packageJson.main + '`');
+                deferred.resolve();
+            });
+
+            return deferred.promise;
+        }).then(done, function(err) {
+            done(util.isError(err) ? err : new Error(err));
         });
+
     });
 
     grunt.registerTask(
@@ -60,4 +81,9 @@ module.exports = function(grunt) {
     );
 
     grunt.registerTask('test', 'jshint');
-}
+    grunt.registerTask('deploy', [
+        'test',
+        'blacklist-dev-deps',
+        'tessel-push'
+    ]);
+};
