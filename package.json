@@ -13,7 +13,7 @@
     "tessel",
     "hardware"
   ],
-  "main": "blinky.js",
+  "main": "app/helios.js",
   "author": "Nick Heiner <nth23@cornell.edu>",
   "license": "MIT",
   "bugs": {

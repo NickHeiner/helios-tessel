@@ -31,7 +31,7 @@ module.exports = function(grunt) {
                 push;
 
             grunt.log.ok('Pushing `' + packageJson.main + '`');
-            push = spawn('tessel', ['push', packageJson.main]);
+            push = spawn('tessel', ['push', packageJson.main, '-l']);
 
             push.stdout.pipe(process.stdout);
             push.stderr.pipe(process.stderr);
