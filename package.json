@@ -22,6 +22,7 @@
   "homepage": "https://github.com/NickHeiner/tessel-helios",
   "dependencies": {
     "ambient-attx4": "^0.1.4",
+    "firebase": "^1.0.17",
     "tessel": "^0.3.5"
   },
   "devDependencies": {
