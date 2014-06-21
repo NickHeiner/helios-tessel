@@ -47,7 +47,12 @@ module.exports = function(grunt) {
                         hardware: blacklistEntries
                     });
 
-                return qFs.write(pkgJsonFilePath, JSON.stringify(withBlacklist));
+                _(blacklistEntries).keys().forEach(function(blacklistEntry) {
+                    grunt.log.ok('Blacklisting `' + blacklistEntry + '`');
+                });
+
+                grunt.log.ok('Writing `' + pkgJsonFilePath + '`');
+                return qFs.write(pkgJsonFilePath, JSON.stringify(withBlacklist, null, 2));
             }).then(done, function(err) {
                 done(util.isError(err) ? err : new Error(err));
             });
