@@ -1,11 +1,25 @@
 'use strict';
 
 var EventEmitter = require('events').EventEmitter,
+    tessel = require('tessel'),
     emitter = new EventEmitter(),
-    count = 0;
+    ambientlib = require('ambient-attx4'),
+    ambient = ambientlib.use(tessel.port.A);
 
-setInterval(function() {
-    emitter.emit('data', 'ping #' + count++);
-}, 500)
+function listenFor(eventType) {
+    console.log('Listening for `' + eventType + '`');
+    ambient.on(eventType, function(data) {
+        emitter.emit(eventType, data);
+        emitter.emit('data', data);
+    });
+}
+
+ambient.on('ready', function() {
+    ['sound', 'light'].forEach(listenFor);
+});
+
+ambient.on('error', function(err) {
+    emitter.emit('error', err);
+});
 
 module.exports = emitter;
