@@ -5,6 +5,7 @@ module.exports = function(grunt) {
         util = require('util'),
         _ = require('lodash'),
         q = require('q'),
+        qResolve = q.denodeify(require('resolve')),
         qFs = require('q-io/fs');
 
     require('load-grunt-tasks')(grunt);
@@ -26,15 +27,36 @@ module.exports = function(grunt) {
 
     grunt.registerTask('tessel-push', function() {
         var done = this.async(),
-            pkgJsonFilePath = path.join(__dirname, 'package.json');
+            pkgJsonFilePath = path.join(__dirname, 'package.json'),
+            getTesselBinPath = qResolve('tessel', {
+                basedir: __dirname,
+                packageFilter: function(packageJsonContents) {
+                    // resolve will give us the script in the `main` field.
+                    // We would like to use the `bin` field instead, so we 
+                    // will transform the package.json so the `bin` field
+                    // overwrites the `main` field.
+                    return _(packageJsonContents)
+                        .omit('main')
+                        .merge({
+                            main: packageJsonContents.bin.tessel
+                        })
+                        .valueOf();
+                }
+            }).spread(function(filePath, fileExports) {
+                return filePath;
+            });
 
-        qFs.read(pkgJsonFilePath).then(function(packageJsonContents) {
+        q.all([
+            qFs.read(pkgJsonFilePath), 
+            getTesselBinPath
+        ]).spread(function(packageJsonContents, tesselPath) {
             var packageJson = JSON.parse(packageJsonContents),
                 deferred = q.defer(),
                 push;
 
-            grunt.log.ok('Pushing `' + packageJson.main + '`');
-            push = spawn('tessel', ['push', packageJson.main, '-l']);
+            grunt.log.ok('Pushing `' + packageJson.main);
+            // TODO don't rely on tessel being installed globally - find it in node_modules
+            push = spawn(tesselPath, ['push', packageJson.main, '-l']);
 
             push.stdout.pipe(process.stdout);
             push.stderr.pipe(process.stderr);

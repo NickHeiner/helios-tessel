@@ -9,8 +9,15 @@ var EventEmitter = require('events').EventEmitter,
 function listenFor(eventType) {
     console.log('Listening for `' + eventType + '`');
     ambient.on(eventType, function(data) {
-        emitter.emit(eventType, data);
-        emitter.emit('data', data);
+
+        data.forEach(function(dataPoint) {
+            emitter.emit(eventType, data);
+            emitter.emit('data', {
+                type: eventType,
+                data: data
+            });
+        });
+        
     });
 }
 
